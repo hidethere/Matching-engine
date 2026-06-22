@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 namespace MatchingEngine.Core;
 public class OrderBook
 {
-    private readonly SortedDictionary<long, Queue<Order>> _bids =
+    private readonly SortedDictionary<long, LinkedList<Order>> _bids =
             new(Comparer<long>.Create((a, b) => b.CompareTo(a)));
 
-    private readonly SortedDictionary<long, Queue<Order>> _asks = new();
+    private readonly SortedDictionary<long, LinkedList<Order>> _asks = new();
     public string Symbol {get; }
     public OrderBook(string symbol)
     {
@@ -23,11 +23,66 @@ public class OrderBook
         var book = order.Side == Side.Buy ? _bids : _asks;
         if(!book.TryGetValue(order.Price, out var ordersEnlisted))
         {
-            ordersEnlisted = new Queue<Order>();
+            ordersEnlisted = new LinkedList<Order>();
             book[order.Price] = ordersEnlisted;
         }
-        ordersEnlisted.Enqueue(order);
+        ordersEnlisted.AddLast(order);
 
+    }
+
+    public void RemoveBestFront(Side side)
+    {
+        if (side == Side.Buy)
+        {
+            _bids.First().Value.RemoveFirst();
+            
+            if (_bids.First().Value.Count == 0)
+            {
+                _bids.Remove(_bids.First().Key);
+            }
+        } else
+        {
+            _asks.First().Value.RemoveFirst();
+            if (_asks.First().Value.Count == 0)
+            {
+                _asks.Remove(_asks.First().Key);
+            }
+        }
+
+    }
+
+    public void ReduceBestFront(Side side, long quantity)
+    {
+        if (side == Side.Buy)
+        {
+            var bestBidOrders = _bids.First().Value;
+            var bestBidOrder = bestBidOrders.First.Value;
+            var reducedOrder = bestBidOrder with { Quantity = bestBidOrder.Quantity - quantity };
+            bestBidOrders.RemoveFirst();
+            if (reducedOrder.Quantity > 0)
+            {
+                bestBidOrders.AddFirst(reducedOrder);
+            }
+            if (bestBidOrders.Count == 0)
+            {
+                _bids.Remove(_bids.First().Key);
+            }
+        }
+        else
+        {
+            var bestAskOrders = _asks.First().Value;
+            var bestAskOrder = bestAskOrders.First.Value;
+            var reducedOrder = bestAskOrder with { Quantity = bestAskOrder.Quantity - quantity };
+            bestAskOrders.RemoveFirst();
+            if (reducedOrder.Quantity > 0)
+            {
+                bestAskOrders.AddFirst(reducedOrder);
+            }
+            if (bestAskOrders.Count == 0)
+            {
+                _asks.Remove(_asks.First().Key);
+            }
+        }
     }
 
     public bool TryGetBestBid(out long price)
@@ -56,7 +111,7 @@ public class OrderBook
     {
         if(_bids.Count > 0)
         {
-            order = _bids.First().Value.Peek();
+            order = _bids.First().Value.First.Value;
             return true;
         }
         order = default;
@@ -68,7 +123,7 @@ public class OrderBook
     {
         if(_asks.Count > 0)
         {
-            order = _asks.First().Value.Peek();
+            order = _asks.First().Value.First.Value;
             return true;
         }
         order = default;
