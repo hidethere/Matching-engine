@@ -15,9 +15,8 @@ namespace MatchingEngine.Core
             Book = new OrderBook(symbol);
         }
 
-        public IReadOnlyList<Trade> Submit(Order incoming)
+        public void Submit(Order incoming, List<Trade> trades)
         {
-            var trades = new List<Trade>();
             long remaining = incoming.Quantity;
 
             if (incoming.Side == Side.Buy)
@@ -52,7 +51,6 @@ namespace MatchingEngine.Core
             {
                 Book.Rest(incoming with { Quantity = remaining });
             }
-            return trades;
         }
 
     }

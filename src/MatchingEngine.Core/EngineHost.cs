@@ -34,15 +34,16 @@ namespace MatchingEngine.Core
         {
             _logger.LogInformation("EngineHost[{Symbol}] consumer started.", _symbol);
             long processed = 0;
-            
+
+            var scratch = new List<Trade>();
             try
             {
 
                 await foreach(var order in _inbound.Reader.ReadAllAsync(ct))
                 {
-                    var trades = _engine.Submit(order);
-
-                    foreach(var trade in trades)
+                    scratch.Clear(); // Clear the scratch list before writing trades to the outbound channel
+                    _engine.Submit(order, scratch);
+                    foreach (var trade in scratch)
                         _outbound.Writer.TryWrite(trade);
                     processed++;
                 
