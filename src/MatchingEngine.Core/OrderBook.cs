@@ -30,66 +30,49 @@ public class OrderBook
 
     }
 
+    private static KeyValuePair<long, LinkedList<Order>> GetBestFront(SortedDictionary<long, LinkedList<Order>> side)
+    {
+        foreach (var entry in side)
+            return entry;
+        throw new InvalidOperationException("The book side is empty.");
+    }
+
     public void RemoveBestFront(Side side)
     {
-        if (side == Side.Buy)
+        var book = side == Side.Buy ? _bids : _asks;
+        var best = GetBestFront(book);
+        var bestPrice = best.Key;
+        var bestOrders = best.Value;
+        bestOrders.RemoveFirst();
+        if (bestOrders.Count == 0)
         {
-            _bids.First().Value.RemoveFirst();
-            
-            if (_bids.First().Value.Count == 0)
-            {
-                _bids.Remove(_bids.First().Key);
-            }
-        } else
-        {
-            _asks.First().Value.RemoveFirst();
-            if (_asks.First().Value.Count == 0)
-            {
-                _asks.Remove(_asks.First().Key);
-            }
+            book.Remove(bestPrice);  
         }
-
     }
 
     public void ReduceBestFront(Side side, long quantity)
     {
-        if (side == Side.Buy)
-        {
-            var bestBidOrders = _bids.First().Value;
-            var bestBidOrder = bestBidOrders.First.Value;
-            var reducedOrder = bestBidOrder with { Quantity = bestBidOrder.Quantity - quantity };
-            bestBidOrders.RemoveFirst();
-            if (reducedOrder.Quantity > 0)
-            {
-                bestBidOrders.AddFirst(reducedOrder);
-            }
-            if (bestBidOrders.Count == 0)
-            {
-                _bids.Remove(_bids.First().Key);
-            }
-        }
-        else
-        {
-            var bestAskOrders = _asks.First().Value;
-            var bestAskOrder = bestAskOrders.First.Value;
-            var reducedOrder = bestAskOrder with { Quantity = bestAskOrder.Quantity - quantity };
-            bestAskOrders.RemoveFirst();
-            if (reducedOrder.Quantity > 0)
-            {
-                bestAskOrders.AddFirst(reducedOrder);
-            }
-            if (bestAskOrders.Count == 0)
-            {
-                _asks.Remove(_asks.First().Key);
-            }
-        }
+        var book = side == Side.Buy ? _bids : _asks;
+        var best = GetBestFront(book);
+        var bestPrice = best.Key;
+        var bestOrders = best.Value;
+        var bestOrder = bestOrders.First!.Value;
+        var reducedOrder = bestOrder with { Quantity = bestOrder.Quantity - quantity };
+        bestOrders.RemoveFirst();
+
+        if (reducedOrder.Quantity > 0)
+            bestOrders.AddFirst(reducedOrder);
+
+        if (bestOrders.Count == 0)
+            book.Remove(bestPrice);
+
     }
 
     public bool TryGetBestBid(out long price)
     {
         if(_bids.Count > 0)
         {
-            price = _bids.First().Key;
+            price = GetBestFront(_bids).Key;
             return true;
         }
         price = 0;
@@ -100,7 +83,7 @@ public class OrderBook
     {
         if(_asks.Count > 0)
         {
-            price = _asks.First().Key;
+            price = GetBestFront(_asks).Key;
             return true;
         }
         price = 0;
@@ -111,7 +94,7 @@ public class OrderBook
     {
         if(_bids.Count > 0)
         {
-            order = _bids.First().Value.First.Value;
+            order = GetBestFront(_bids).Value.First!.Value;
             return true;
         }
         order = default;
@@ -123,7 +106,7 @@ public class OrderBook
     {
         if(_asks.Count > 0)
         {
-            order = _asks.First().Value.First.Value;
+            order = GetBestFront(_asks).Value.First!.Value;
             return true;
         }
         order = default;
