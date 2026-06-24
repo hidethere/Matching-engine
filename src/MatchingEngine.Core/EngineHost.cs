@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Channels;
-using System.Threading.Tasks;
+﻿using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -13,21 +8,18 @@ namespace MatchingEngine.Core
     {
         private readonly string _symbol;
         private readonly MatchingEngine _engine;
-        private readonly Channel<Order> _inbound = Channel.CreateUnbounded<Order>();
         private readonly Channel<Trade> _outbound = Channel.CreateUnbounded<Trade>();
+        private readonly IOrderLog _orderLog;
 
         private readonly ILogger<EngineHost> _logger;
 
-        public EngineHost(string symbol, ILogger<EngineHost>? logger = null)
+        public EngineHost(string symbol, IOrderLog orderlog, ILogger<EngineHost>? logger = null)
         {
             _symbol = symbol;
             _engine = new MatchingEngine(symbol);
+            _orderLog = orderlog;
             _logger = logger ?? NullLogger<EngineHost>.Instance; // Use a null logger if no logger is provided
-        }
 
-        public bool Submit(Order order)
-        {
-            return _inbound.Writer.TryWrite(order);
         }
 
         public async Task RunAsync(CancellationToken ct = default)
@@ -39,7 +31,7 @@ namespace MatchingEngine.Core
             try
             {
 
-                await foreach(var order in _inbound.Reader.ReadAllAsync(ct))
+                await foreach(var order in _orderLog.ReadAllAsync(ct))
                 {
                     scratch.Clear(); // Clear the scratch list before writing trades to the outbound channel
                     _engine.Submit(order, scratch);
@@ -64,9 +56,6 @@ namespace MatchingEngine.Core
                 _logger.LogInformation("EngineHost[{Symbol}] stopped after {Processed} orders", _symbol, processed);
             }
         }
-
-        public void Complete() => _inbound.Writer.Complete();
-
         public ChannelReader<Trade> Trades => _outbound.Reader;
     }
 }
