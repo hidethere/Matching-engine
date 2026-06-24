@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MatchingEngine.Core\MatchingEngine.Core.csproj" />
+    <ProjectReference Include="..\..\src\Shared\MatchingEngine.Core\MatchingEngine.Core.csproj" />
   </ItemGroup>
 
 </Project>

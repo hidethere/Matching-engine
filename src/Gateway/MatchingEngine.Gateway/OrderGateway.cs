@@ -39,7 +39,7 @@ namespace MatchingEngine.Gateway
                 return Reject("Invalid order parameters", request);
 
             if (string.IsNullOrWhiteSpace(request.IdempotencyKey))
-                return Reject("Idempoteny key is required", request);
+                return Reject("Idempotency key is required", request);
 
             Order order = _seen.GetOrAdd(request.IdempotencyKey, _ =>
             {
