@@ -1,5 +1,6 @@
 using MatchingEngine.Core;
 using MatchingEngine.Gateway;
+using MatchingEngine.Gateway.Dtos;
 using MatchingEngine.Kafka;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,11 +19,26 @@ app.MapPost("/api/v1/orders", (OrderRequest request, OrderGateway gateway, IOrde
 {
     var result = gateway.Accept(request);
     if (!result.Accepted)
-        return Results.BadRequest(new { error = result.RejectReason });
+        return Results.BadRequest(
+            new OrderResponse(
+            result.Order,
+            result.Accepted,
+            result.RejectReason,
+            result.IsNew
+            )
+        );
+
     if (result.IsNew)
         orderLog.Append(result.Order);
 
-    return Results.Ok(new { orderId = result.Order.Id });
+    return Results.Ok(
+        new OrderResponse(
+            result.Order,
+            result.Accepted,
+            result.RejectReason,
+            result.IsNew
+            )
+        );
 
 });
 

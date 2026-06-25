@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Shared\MatchingEngine.Core\MatchingEngine.Core.csproj" />
-    <ProjectReference Include="..\..\src\Gateway\MatchingEngine.Gateway\MatchingEngine.Gateway.csproj" />
+    <ProjectReference Include="..\..\src\Services\Gateway\MatchingEngine.Gateway\MatchingEngine.Gateway.csproj" />
   </ItemGroup>
 
   <ItemGroup>

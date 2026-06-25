@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Shared\MatchingEngine.Core\MatchingEngine.Core.csproj" />
+    <ProjectReference Include="..\..\Shared\MatchingEngine.Contracts\MatchingEngine.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>
