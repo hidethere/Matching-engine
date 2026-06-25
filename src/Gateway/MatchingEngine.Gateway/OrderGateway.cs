@@ -41,8 +41,10 @@ namespace MatchingEngine.Gateway
             if (string.IsNullOrWhiteSpace(request.IdempotencyKey))
                 return Reject("Idempotency key is required", request);
 
+            bool isNew = false;
             Order order = _seen.GetOrAdd(request.IdempotencyKey, _ =>
             {
+                isNew = true;
                 long id = Interlocked.Increment(ref _nextId);
                 return new Order(id, request.Symbol, request.Side, request.Price, request.Quantity);
             }
@@ -52,7 +54,9 @@ namespace MatchingEngine.Gateway
             {
                 Accepted = true,
                 Order = order,
-                RejectReason = null
+                RejectReason = null,
+                IsNew = isNew
+
             };
         }
     }

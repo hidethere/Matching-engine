@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MatchingEngine.Gateway\MatchingEngine.Gateway.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\MatchingEngine.Kafka\MatchingEngine.Kafka.csproj" />
   </ItemGroup>
 
 </Project>

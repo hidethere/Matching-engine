@@ -1,12 +1,13 @@
 using MatchingEngine.Api.services;
 using MatchingEngine.Core;
 using MatchingEngine.Gateway;
+using MatchingEngine.Kafka;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSingleton<OrderGateway>();
-builder.Services.AddSingleton<IOrderLog, InMemoryOrderLog>();
+builder.Services.AddSingleton<IOrderLog>(_ => new KafkaOrderLog("localhost:9092", "orders")); 
 builder.Services.AddSingleton(sp => new EngineHost("AAPL",
     sp.GetRequiredService<IOrderLog>(),
     sp.GetRequiredService<ILogger<EngineHost>>()));
@@ -24,8 +25,9 @@ app.MapPost("/api/v1/orders", (OrderRequest request, OrderGateway gateway, IOrde
     var result = gateway.Accept(request);
     if (!result.Accepted)
         return Results.BadRequest(new { error = result.RejectReason });
+    if (result.IsNew)
+        orderLog.Append(result.Order);
 
-    orderLog.Append(result.Order);
     return Results.Ok(new { orderId = result.Order.Id });
 
 });
