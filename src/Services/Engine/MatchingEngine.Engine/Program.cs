@@ -8,7 +8,7 @@ builder.Services.AddSingleton<IOrderLog>(_ => new KafkaOrderLog("localhost:9092"
 builder.Services.AddSingleton<ITradePublisher>(_ =>
     new KafkaTradePublisher("localhost:9092", "trades")
 );
-builder.Services.AddSingleton(sp => new EngineHost("AAPL",
+builder.Services.AddSingleton(sp => new EngineHost(
     sp.GetRequiredService<IOrderLog>(),
     sp.GetRequiredService<ILogger<EngineHost>>()));
 builder.Services.AddHostedService<Worker>();

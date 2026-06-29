@@ -1,5 +1,7 @@
 using MatchingEngine.Core;
+using MatchingEngine.Contracts;
 using MatchingEngine.Gateway;
+using MatchingEngine.Gateway.Dtos;
 using Xunit;
 
 namespace MatchingEngine.Gateway.Tests;
@@ -17,7 +19,7 @@ public class OrderGatewayTests
 
         // ASSERT
         Assert.True(result.Accepted);
-        Assert.Equal(1, result.Order.Id);        
+        Assert.Equal(OrderId.For(1, 1), result.Order.ClientOrderId);
         Assert.Equal("AAPL", result.Order.Symbol);
         Assert.Equal(Side.Buy, result.Order.Side);
         Assert.Equal(100_00, result.Order.Price);
@@ -36,8 +38,8 @@ public class OrderGatewayTests
         var second = gateway.Accept(new OrderRequest("AAPL", Side.Sell, 101_00, 3, "k2"));
 
         //ASSERT
-        Assert.Equal(1, first.Order.Id);
-        Assert.Equal(2, second.Order.Id);
+        Assert.Equal(OrderId.For(1, 1), first.Order.ClientOrderId);
+        Assert.Equal(OrderId.For(1, 2), second.Order.ClientOrderId);
     }
 
     // [Theory] + [InlineData] = the same test body run once per data row (parameterized).
@@ -71,6 +73,6 @@ public class OrderGatewayTests
         var second = gateway.Accept(req);
 
         // ASSERT
-        Assert.Equal(first.Order.Id, second.Order.Id);
+        Assert.Equal(first.Order.ClientOrderId, second.Order.ClientOrderId);
     }
 }

@@ -6,17 +6,16 @@ namespace MatchingEngine.Core
 {
     public class EngineHost
     {
-        private readonly string _symbol;
-        private readonly MatchingEngine _engine;
+        private long _seq;
+        private readonly Dictionary<string, MatchingEngine> _engines;
         private readonly Channel<Trade> _outbound = Channel.CreateUnbounded<Trade>();
         private readonly IOrderLog _orderLog;
 
         private readonly ILogger<EngineHost> _logger;
 
-        public EngineHost(string symbol, IOrderLog orderlog, ILogger<EngineHost>? logger = null)
+        public EngineHost(IOrderLog orderlog, ILogger<EngineHost>? logger = null)
         {
-            _symbol = symbol;
-            _engine = new MatchingEngine(symbol);
+            _engines = new Dictionary<string, MatchingEngine>();
             _orderLog = orderlog;
             _logger = logger ?? NullLogger<EngineHost>.Instance; // Use a null logger if no logger is provided
 
@@ -24,8 +23,9 @@ namespace MatchingEngine.Core
 
         public async Task RunAsync(CancellationToken ct = default)
         {
-            _logger.LogInformation("EngineHost[{Symbol}] consumer started.", _symbol);
+            _logger.LogInformation("EngineHost consumer started.");
             long processed = 0;
+
 
             var scratch = new List<Trade>();
             try
@@ -33,27 +33,38 @@ namespace MatchingEngine.Core
 
                 await foreach(var order in _orderLog.ReadAllAsync(ct))
                 {
-                    scratch.Clear(); // Clear the scratch list before writing trades to the outbound channel
-                    _engine.Submit(order, scratch);
-                    foreach (var trade in scratch)
-                        _outbound.Writer.TryWrite(trade);
+                    if (!_engines.TryGetValue(order.Symbol, out var engine))
+                        _engines.Add(order.Symbol, engine = new MatchingEngine(order.Symbol));
+                        
+                    if (order.Action == OrderAction.Cancel)
+                    {
+                            engine.Cancel(order.ClientOrderId);
+                    }
+                    else
+                    {
+                        var stamped = order with { Id = ++_seq };
+                        scratch.Clear(); // Clear the scratch list before writing trades to the outbound channel
+                        engine.Submit(stamped, scratch);
+                        foreach (var trade in scratch)
+                            _outbound.Writer.TryWrite(trade);
+                    }
                     processed++;
                 
                 }
             }
             catch (OperationCanceledException)
             {
-                _logger.LogInformation("EngineHost[{Symbol}] consumer canceled", _symbol);
+                _logger.LogInformation("EngineHost consumer canceled");
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex, "EngineHost[{Symbol}] halted after a fatal error", _symbol);
+                _logger.LogCritical(ex, "EngineHost halted after a fatal error");
                 throw;
             }
             finally
             {
                 _outbound.Writer.Complete();    
-                _logger.LogInformation("EngineHost[{Symbol}] stopped after {Processed} orders", _symbol, processed);
+                _logger.LogInformation("EngineHost stopped after {Processed} orders across {Symbols} symbols", processed, _engines.Count);
             }
         }
         public ChannelReader<Trade> Trades => _outbound.Reader;

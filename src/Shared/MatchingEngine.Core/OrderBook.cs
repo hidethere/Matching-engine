@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -12,6 +13,8 @@ public class OrderBook
             new(Comparer<long>.Create((a, b) => b.CompareTo(a)));
 
     private readonly SortedDictionary<long, LinkedList<Order>> _asks = new();
+    private readonly Dictionary<long, LinkedListNode<Order>> _index = new();
+
     public string Symbol {get; }
     public OrderBook(string symbol)
     {
@@ -26,7 +29,8 @@ public class OrderBook
             ordersEnlisted = new LinkedList<Order>();
             book[order.Price] = ordersEnlisted;
         }
-        ordersEnlisted.AddLast(order);
+        var node = ordersEnlisted.AddLast(order);
+        _index[order.ClientOrderId] = node;
 
     }
 
@@ -43,6 +47,7 @@ public class OrderBook
         var best = GetBestFront(book);
         var bestPrice = best.Key;
         var bestOrders = best.Value;
+        _index.Remove(bestOrders.First!.Value.ClientOrderId);
         bestOrders.RemoveFirst();
         if (bestOrders.Count == 0)
         {
@@ -61,10 +66,36 @@ public class OrderBook
         bestOrders.RemoveFirst();
 
         if (reducedOrder.Quantity > 0)
-            bestOrders.AddFirst(reducedOrder);
+        {
+            var node = bestOrders.AddFirst(reducedOrder);
+            _index[reducedOrder.ClientOrderId] = node;
+        }
+        else
+        {
+            _index.Remove(bestOrder.ClientOrderId);
+        }
 
         if (bestOrders.Count == 0)
             book.Remove(bestPrice);
+
+    }
+
+    public bool Cancel(long clientorderId)
+    {
+        if (!_index.TryGetValue(clientorderId, out var node))
+            return false;
+
+        var order = node.Value;
+        var book = order.Side == Side.Buy ? _bids : _asks;
+
+        if (book.TryGetValue(order.Price, out var level))
+        {
+            level.Remove(node);
+            if (level.Count == 0)
+                book.Remove(order.Price);
+        }
+        _index.Remove(clientorderId);
+        return true;
 
     }
 

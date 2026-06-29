@@ -12,8 +12,8 @@ public class InMemoryOrderLogTests
         var orderLog = new InMemoryOrderLog();
 
         // ACT
-        orderLog.Append(new Order(1, "AAPL", Side.Buy, 100_00, 5));
-        orderLog.Append(new Order(2, "AAPL", Side.Sell, 101_00, 3));
+        orderLog.Append(new Order(1, 1, "AAPL", Side.Buy, 100_00, 5));
+        orderLog.Append(new Order(2, 2, "AAPL", Side.Sell, 101_00, 3));
         orderLog.Complete();
 
         var read = new List<Order>();

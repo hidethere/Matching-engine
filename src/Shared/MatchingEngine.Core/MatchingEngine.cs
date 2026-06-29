@@ -15,6 +15,8 @@ namespace MatchingEngine.Core
             Book = new OrderBook(symbol);
         }
 
+        public bool Cancel(long clientorderId) => Book.Cancel(clientorderId);
+
         public void Submit(Order incoming, List<Trade> trades)
         {
             long remaining = incoming.Quantity;
@@ -24,7 +26,7 @@ namespace MatchingEngine.Core
                 while (remaining > 0 && Book.TryPeekBestAsk(out var resting) && incoming.Price >= resting.Price)
                 {
                     long fill = Math.Min(remaining, resting.Quantity);
-                    trades.Add(new Trade(incoming.Id, resting.Id, resting.Price, fill));
+                    trades.Add(new Trade(incoming.Id, resting.Id, resting.Price, fill, incoming.Symbol));
                     remaining -= fill;
 
                     if (fill == resting.Quantity)
@@ -38,7 +40,7 @@ namespace MatchingEngine.Core
                 while (remaining > 0 && Book.TryPeekBestBid(out var resting) && incoming.Price <= resting.Price)
                 {
                     long fill = Math.Min(remaining, resting.Quantity);
-                    trades.Add(new Trade(resting.Id, incoming.Id, resting.Price, fill));
+                    trades.Add(new Trade(resting.Id, incoming.Id, resting.Price, fill, incoming.Symbol));
                     remaining -= fill;
                     if (fill == resting.Quantity)
                         Book.RemoveBestFront(Side.Buy);

@@ -1,5 +1,6 @@
 ﻿using MatchingEngine.Core;
 using MatchingEngine.Gateway;
+using MatchingEngine.Gateway.Dtos;
 
 namespace MatchingEngine.IntegrationTests
 {
@@ -11,7 +12,7 @@ namespace MatchingEngine.IntegrationTests
             // ARRANGE
             var orderLog = new InMemoryOrderLog();
             var gateway = new OrderGateway();
-            var host = new EngineHost("AAPL", orderLog);
+            var host = new EngineHost(orderLog);
 
             // ACT
             var sell = gateway.Accept(new OrderRequest("AAPL", Side.Sell, 102_00, 5, "k1"));
@@ -42,8 +43,8 @@ namespace MatchingEngine.IntegrationTests
             // ARRANGE — two partitions, each a (log + host) pair
             var appleLog = new InMemoryOrderLog();
             var msftLog = new InMemoryOrderLog();
-            var appleHost = new EngineHost("AAPL", appleLog);
-            var msftHost = new EngineHost("MSFT", msftLog);
+            var appleHost = new EngineHost(appleLog);
+            var msftHost = new EngineHost(msftLog);
 
             var router = new SymbolRouter(new Dictionary<string, IOrderLog>
             {
@@ -52,10 +53,10 @@ namespace MatchingEngine.IntegrationTests
             });
 
             // ACT — a matching pair for each symbol, through the one router
-            router.Route(new Order(1, "AAPL", Side.Sell, 102_00, 5));
-            router.Route(new Order(2, "AAPL", Side.Buy, 103_00, 5));
-            router.Route(new Order(3, "MSFT", Side.Sell, 50_00, 7));
-            router.Route(new Order(4, "MSFT", Side.Buy, 51_00, 7));
+            router.Route(new Order(1, 1, "AAPL", Side.Sell, 102_00, 5));
+            router.Route(new Order(2, 2, "AAPL", Side.Buy, 103_00, 5));
+            router.Route(new Order(3, 3, "MSFT", Side.Sell, 50_00, 7));
+            router.Route(new Order(4, 4, "MSFT", Side.Buy, 51_00, 7));
 
             appleLog.Complete();
             msftLog.Complete();

@@ -13,14 +13,14 @@ namespace MatchingEngine.Kafka
     public class KafkaTradePublisher : ITradePublisher
     {
         private readonly string _topic;
-        private readonly IProducer<Null, string> _producer;
+        private readonly IProducer<string, string> _producer;
 
         public KafkaTradePublisher(string bootstrapServers, string topic)
         {
             _topic = topic;
             EnsureTopicExists(bootstrapServers, topic);
             var config = new ProducerConfig { BootstrapServers = bootstrapServers };
-            _producer = new ProducerBuilder<Null, string>(config).Build();
+            _producer = new ProducerBuilder<string, string>(config).Build();
         }
 
         private static void EnsureTopicExists(string bootstrapServers, string topic)
@@ -51,7 +51,7 @@ namespace MatchingEngine.Kafka
         public void Publish(Trade trade)
         {
             var json = JsonSerializer.Serialize(trade);
-            _producer.Produce(_topic, new Message<Null, string> { Value = json });
+            _producer.Produce(_topic, new Message<string, string> { Key = trade.Symbol, Value = json });
         }
     }
 }

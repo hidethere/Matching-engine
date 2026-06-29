@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MatchingEngine.Contracts;
 using MatchingEngine.Core;
 using MatchingEngine.Gateway.Dtos;
 using Microsoft.Extensions.Logging;
@@ -46,8 +47,8 @@ namespace MatchingEngine.Gateway
             Order order = _seen.GetOrAdd(request.IdempotencyKey, _ =>
             {
                 isNew = true;
-                long id = Interlocked.Increment(ref _nextId);
-                return new Order(id, request.Symbol, request.Side, request.Price, request.Quantity);
+                long clientId = OrderId.For(1, Interlocked.Increment(ref _nextId));
+                return new Order(0, clientId, request.Symbol, request.Side, request.Price, request.Quantity);
             }
             );
 

@@ -15,31 +15,20 @@ builder.Services.AddOpenApi();
 var app = builder.Build();
 
 // Minimal API
-app.MapPost("/api/v1/orders", (OrderRequest request, OrderGateway gateway, IOrderLog orderLog) =>
+app.MapPost("/api/v1/orders", (OrderRequest request, OrderGateway gateway, IOrderLog orderLog, HttpResponse response) =>
 {
     var result = gateway.Accept(request);
     if (!result.Accepted)
-        return Results.BadRequest(
-            new OrderResponse(
-            result.Order,
-            result.Accepted,
-            result.RejectReason,
-            result.IsNew
-            )
-        );
+        return Results.BadRequest(new OrderRejected(result.RejectReason!));
 
     if (result.IsNew)
         orderLog.Append(result.Order);
+    else
+        response.Headers["Idempotency-Replayed"] = "true";   // duplicate signal
 
-    return Results.Ok(
-        new OrderResponse(
-            result.Order,
-            result.Accepted,
-            result.RejectReason,
-            result.IsNew
-            )
-        );
-
+    return Results.Accepted(
+        $"/api/v1/orders/{result.Order.ClientOrderId}",
+        new OrderResponse(result.Order.ClientOrderId));
 });
 
 // Configure the HTTP request pipeline.
