@@ -19,7 +19,7 @@ public class MatchingEngineBenchmarks
      public void Submit_a_matching_pair()
      {
         _trades.Clear();
-        _engine.Submit(new Order(1, 1, "AAPL", Side.Buy, 100_00, 5), _trades);
-        _engine.Submit(new Order(2, 2, "AAPL", Side.Sell, 100_00, 5), _trades);
+        _engine.Submit(new Order(0,1, "AAPL", Side.Buy, 100_00, 5), _trades);
+        _engine.Submit(new Order(0,2, "AAPL", Side.Sell, 100_00, 5), _trades);
     }
 }

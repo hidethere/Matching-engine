@@ -11,7 +11,7 @@ public class MatchingEngineTests
         var engine = new MatchingEngine("AAPL");
         var trades = new List<Trade>();
 
-        engine.Submit(new Order(1, 1, "AAPL", Side.Buy, 100_00, 5), trades);
+        engine.Submit(new Order(0, 1, "AAPL", Side.Buy, 100_00, 5), trades);
 
         Assert.Empty(trades);
         Assert.True(engine.Book.TryGetBestBid(out var bestBid));
@@ -24,8 +24,8 @@ public class MatchingEngineTests
         var engine = new MatchingEngine("AAPL");
         var trades = new List<Trade>();
 
-        engine.Submit(new Order(4, 4, "AAPL", Side.Sell, 102_00, 5), trades);
-        engine.Submit(new Order(9, 9, "AAPL", Side.Buy, 103_00, 5), trades);
+        engine.Submit(new Order(0, 4, "AAPL", Side.Sell, 102_00, 5), trades);
+        engine.Submit(new Order(0, 9, "AAPL", Side.Buy, 103_00, 5), trades);
 
         Assert.Single(trades);
         Assert.Equal(102_00, trades.First().Price);
@@ -39,8 +39,8 @@ public class MatchingEngineTests
         var engine = new MatchingEngine("AAPL");
         var trades = new List<Trade>();
 
-        engine.Submit(new Order(4, 4, "AAPL", Side.Sell, 102_00, 5), trades);
-        engine.Submit(new Order(9, 9, "AAPL", Side.Buy, 103_00, 7), trades);
+        engine.Submit(new Order(0, 4, "AAPL", Side.Sell, 102_00, 5), trades);
+        engine.Submit(new Order(0, 9, "AAPL", Side.Buy, 103_00, 7), trades);
 
         Assert.Single(trades);
         Assert.Equal(102_00, trades.First().Price);
@@ -55,8 +55,8 @@ public class MatchingEngineTests
         var engine = new MatchingEngine("AAPL");
         var trades = new List<Trade>();
 
-        engine.Submit(new Order(4, 4, "AAPL", Side.Sell, 102_00, 5), trades);
-        engine.Submit(new Order(9, 9, "AAPL", Side.Buy, 103_00, 3), trades);
+        engine.Submit(new Order(0, 4, "AAPL", Side.Sell, 102_00, 5), trades);
+        engine.Submit(new Order(0, 9, "AAPL", Side.Buy, 103_00, 3), trades);
 
         Assert.Single(trades);
         Assert.Equal(102_00, trades.First().Price);
@@ -72,8 +72,8 @@ public class MatchingEngineTests
         var engine = new MatchingEngine("AAPL");
         var trades = new List<Trade>();
 
-        engine.Submit(new Order(4, 4, "AAPL", Side.Buy, 100_00, 5), trades);
-        engine.Submit(new Order(9, 9, "AAPL", Side.Sell, 99_00, 3), trades);
+        engine.Submit(new Order(0, 4, "AAPL", Side.Buy, 100_00, 5), trades);
+        engine.Submit(new Order(0, 9, "AAPL", Side.Sell, 99_00, 3), trades);
 
         Assert.Single(trades);
         Assert.Equal(100_00, trades.First().Price);
@@ -89,9 +89,9 @@ public class MatchingEngineTests
         var engine = new MatchingEngine("AAPL");
         var trades = new List<Trade>();
 
-        engine.Submit(new Order(1, 1, "AAPL", Side.Sell, 101_00, 2), trades);
-        engine.Submit(new Order(2, 2, "AAPL", Side.Sell, 102_00, 2), trades);
-        engine.Submit(new Order(9, 9, "AAPL", Side.Buy, 103_00, 5), trades);
+        engine.Submit(new Order(0, 1, "AAPL", Side.Sell, 101_00, 2), trades);
+        engine.Submit(new Order(0, 2, "AAPL", Side.Sell, 102_00, 2), trades);
+        engine.Submit(new Order(0, 9, "AAPL", Side.Buy, 103_00, 5), trades);
 
         Assert.Equal(2, trades.Count);
         Assert.Equal(101_00, trades[0].Price);

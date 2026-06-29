@@ -5,12 +5,15 @@ namespace MatchingEngine.MarketData;
 public class Worker : BackgroundService
 {
     private readonly ITradeConsumer _trades;
-    private readonly Dictionary<string, long> _lastPrice = new();
+    private readonly Ticker _ticker;
+    private readonly PriceBroadcaster _bus;
     private readonly ILogger<Worker> _logger;
 
-    public Worker(ITradeConsumer trades,ILogger<Worker> logger)
+    public Worker(ITradeConsumer trades, Ticker ticker, PriceBroadcaster bus, ILogger<Worker> logger)
     {
         _trades = trades;
+        _ticker = ticker;
+        _bus = bus;
         _logger = logger;
     }
 
@@ -18,7 +21,8 @@ public class Worker : BackgroundService
     {
         await foreach (var trade in _trades.ReadAllAsync(stoppingToken))
         {
-            _lastPrice[trade.Symbol] = trade.Price;
+            _ticker.Record(trade.Symbol, trade.Price);
+            _bus.Publish(trade.Symbol, trade.Price);
             _logger.LogInformation("{Symbol} last {Price}", trade.Symbol, trade.Price);
         }
     }

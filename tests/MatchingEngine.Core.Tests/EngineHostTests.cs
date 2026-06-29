@@ -10,8 +10,8 @@ public class EngineHostTests
     {
         var orderLog = new InMemoryOrderLog();
         var host = new EngineHost(orderLog);
-        orderLog.Append(new Order(4, 4, "AAPL", Side.Sell, 102_00, 5));
-        orderLog.Append(new Order(5, 5, "AAPL", Side.Buy, 103_00, 5));
+        orderLog.Append(new Order(0, 4, "AAPL", Side.Sell, 102_00, 5));
+        orderLog.Append(new Order(0, 5, "AAPL", Side.Buy, 103_00, 5));
         orderLog.Complete();
 
         await host.RunAsync();
@@ -30,25 +30,25 @@ public class EngineHostTests
     {
         var orderLog = new InMemoryOrderLog();
         var host = new EngineHost(orderLog);
-        orderLog.Append(new Order(1, 1, "AAPL", Side.Sell, 100_00, 1_000_000));
+        orderLog.Append(new Order(0, 1, "AAPL", Side.Sell, 100_00, 1_000_000));
 
         var consumer = host.RunAsync();
 
         var producers1 = Task.Run(() => {
             for (int i = 0; i < 250; i++)
-                orderLog.Append(new Order(1000 + i, 1000 + i, "AAPL", Side.Buy, 100_00, 1));
+                orderLog.Append(new Order(0, 1000 + i, "AAPL", Side.Buy, 100_00, 1));
         });
         var producers2 = Task.Run(() => {
             for (int i = 0; i < 250; i++)
-                orderLog.Append(new Order(2000 + i, 2000 + i, "AAPL", Side.Buy, 100_00, 1));
+                orderLog.Append(new Order(0, 2000 + i, "AAPL", Side.Buy, 100_00, 1));
         });
         var producers3 = Task.Run(() => {
             for (int i = 0; i < 250; i++)
-                orderLog.Append(new Order(3000 + i, 3000 + i, "AAPL", Side.Buy, 100_00, 1));
+                orderLog.Append(new Order(0, 3000 + i, "AAPL", Side.Buy, 100_00, 1));
         });
         var producers4 = Task.Run(() => {
             for (int i = 0; i < 250; i++)
-                orderLog.Append(new Order(4000 + i, 4000 + i, "AAPL", Side.Buy, 100_00, 1));
+                orderLog.Append(new Order(0, 4000 + i, "AAPL", Side.Buy, 100_00, 1));
         });
         await Task.WhenAll(producers1, producers2, producers3, producers4);
         orderLog.Complete();

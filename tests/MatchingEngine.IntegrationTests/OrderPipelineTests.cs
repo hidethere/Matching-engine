@@ -53,10 +53,10 @@ namespace MatchingEngine.IntegrationTests
             });
 
             // ACT — a matching pair for each symbol, through the one router
-            router.Route(new Order(1, 1, "AAPL", Side.Sell, 102_00, 5));
-            router.Route(new Order(2, 2, "AAPL", Side.Buy, 103_00, 5));
-            router.Route(new Order(3, 3, "MSFT", Side.Sell, 50_00, 7));
-            router.Route(new Order(4, 4, "MSFT", Side.Buy, 51_00, 7));
+            router.Route(new Order(0, 1, "AAPL", Side.Sell, 102_00, 5));
+            router.Route(new Order(0, 2, "AAPL", Side.Buy, 103_00, 5));
+            router.Route(new Order(0, 3, "MSFT", Side.Sell, 50_00, 7));
+            router.Route(new Order(0, 4, "MSFT", Side.Buy, 51_00, 7));
 
             appleLog.Complete();
             msftLog.Complete();
