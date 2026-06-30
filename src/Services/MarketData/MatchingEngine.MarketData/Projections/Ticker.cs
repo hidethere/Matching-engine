@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace MatchingEngine.MarketData
+namespace MatchingEngine.MarketData.Projections
 {
     public class Ticker
     {

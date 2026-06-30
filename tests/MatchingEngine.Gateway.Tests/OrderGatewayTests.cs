@@ -75,4 +75,5 @@ public class OrderGatewayTests
         // ASSERT
         Assert.Equal(first.Order.ClientOrderId, second.Order.ClientOrderId);
     }
+
 }

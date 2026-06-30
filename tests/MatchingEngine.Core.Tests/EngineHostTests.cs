@@ -60,4 +60,49 @@ public class EngineHostTests
 
         Assert.Equal(1000, trades.Count);
     }
+
+    [Fact]
+    public async Task Canceled_order_does_not_trade()
+    {
+        // ARRANGE
+        var orderLog = new InMemoryOrderLog();
+        var host = new EngineHost(orderLog);
+
+        // ACT
+        orderLog.Append(new Order(0, 1, "BTCUSDT", Side.Sell, 100_00, 5));
+        orderLog.Append(new Order(0, 1, "BTCUSDT", Side.Sell, 100_00, 5, OrderAction.Cancel));
+        orderLog.Append(new Order(0, 3, "BTCUSDT", Side.Buy, 100_00, 5));
+        orderLog.Complete();
+
+        await host.RunAsync();
+        var trades = new List<Trade>();
+
+        await foreach (var t in host.Trades.ReadAllAsync())
+            trades.Add(t);
+
+        // ASSERT
+        Assert.Empty(trades);
+    }
+
+    [Fact]
+    public async Task Different_symbols_do_not_cross()
+    {
+        // ARRANGE
+        var orderLog = new InMemoryOrderLog();
+        var host = new EngineHost(orderLog);
+
+        // ACT
+        orderLog.Append(new Order(0, 1, "BTCUSDT", Side.Sell, 100_00, 5));
+        orderLog.Append(new Order(0, 2, "ETHUSDT", Side.Buy, 100_00, 5));
+        orderLog.Complete();
+        
+        await host.RunAsync();
+        var trades = new List<Trade>();
+
+        await foreach (var t in host.Trades.ReadAllAsync())
+            trades.Add(t);
+
+        //ASSERT
+        Assert.Empty(trades);
+    }
 }

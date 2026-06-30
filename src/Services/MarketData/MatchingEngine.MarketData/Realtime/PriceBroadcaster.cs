@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading.Channels;
 
-namespace MatchingEngine.MarketData
+namespace MatchingEngine.MarketData.Realtime
 {
     public class PriceBroadcaster
     {

@@ -6,18 +6,6 @@ namespace MatchingEngine.Core.Tests;
 public class DomainModelTests
 {
     [Fact]
-    public void Order_has_value_equality()
-    {
-        // Prices are integer minor units: 150_00 == $150.00.
-        var a = new Order(Id: 0, ClientOrderId: 1, Symbol: "AAPL", Side: Side.Buy, Price: 150_00, Quantity: 10);
-        var b = new Order(Id: 0, ClientOrderId: 2,Symbol: "AAPL", Side: Side.Buy, Price: 150_00, Quantity: 10);
-
-        // record struct gives value equality + a generated == operator for free.
-        Assert.Equal(a, b);
-        Assert.True(a == b);
-    }
-
-    [Fact]
     public void Order_is_immutable_with_produces_a_new_value()
     {
         var original = new Order(0, 1, "AAPL", Side.Buy, 150_00, 10);

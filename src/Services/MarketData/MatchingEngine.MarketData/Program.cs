@@ -3,6 +3,8 @@ using System.Text;
 using MatchingEngine.Contracts.Abstractions;
 using MatchingEngine.Kafka;
 using MatchingEngine.MarketData;
+using MatchingEngine.MarketData.Projections;
+using MatchingEngine.MarketData.Realtime;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 

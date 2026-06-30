@@ -1,4 +1,6 @@
 using MatchingEngine.Contracts.Abstractions;
+using MatchingEngine.MarketData.Projections;
+using MatchingEngine.MarketData.Realtime;
 
 namespace MatchingEngine.MarketData;
 
