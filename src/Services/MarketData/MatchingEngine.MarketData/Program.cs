@@ -10,7 +10,8 @@ using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHostedService<Worker>();
-builder.Services.AddSingleton<ITradeConsumer>(_ => new KafkaTradeConsumer("localhost:9092", "trades", "market-data"));
+var kafka = builder.Configuration["Kafka:BootstrapServers"] ?? "localhost:9092";
+builder.Services.AddSingleton<ITradeConsumer>(_ => new KafkaTradeConsumer(kafka, "trades", "market-data"));
 builder.Services.AddSingleton<Ticker>();
 builder.Services.AddSingleton<PriceBroadcaster>();
 

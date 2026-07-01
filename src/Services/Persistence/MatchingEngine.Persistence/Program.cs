@@ -4,7 +4,8 @@ using MatchingEngine.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddSingleton<ITradeConsumer>(_ => new KafkaTradeConsumer("localhost:9092", "trades", "persistence"));
+var kafka = builder.Configuration["Kafka:BootstrapServers"] ?? "localhost:9092";
+builder.Services.AddSingleton<ITradeConsumer>(_ => new KafkaTradeConsumer(kafka, "trades", "persistence"));
 var conn = builder.Configuration.GetConnectionString("Trades");
 builder.Services.AddDbContextFactory<TradesDbContext>(options => options.UseNpgsql(conn));
 

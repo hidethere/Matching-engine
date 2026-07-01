@@ -3,10 +3,10 @@ using MatchingEngine.Engine;
 using MatchingEngine.Kafka;
 
 var builder = Host.CreateApplicationBuilder(args);
-
-builder.Services.AddSingleton<IOrderLog>(_ => new KafkaOrderLog("localhost:9092", "orders"));
+var kafka = builder.Configuration["Kafka:BootstrapServers"] ?? "localhost:9092";
+builder.Services.AddSingleton<IOrderLog>(_ => new KafkaOrderLog(kafka, "orders"));
 builder.Services.AddSingleton<ITradePublisher>(_ =>
-    new KafkaTradePublisher("localhost:9092", "trades")
+    new KafkaTradePublisher(kafka, "trades")
 );
 builder.Services.AddSingleton(sp => new EngineHost(
     sp.GetRequiredService<IOrderLog>(),
