@@ -6,4 +6,6 @@ public readonly record struct Trade(
     long SellOrderId,
     long Price,
     long Quantity,
-    string Symbol);
+    string Symbol,
+    long Id = 0,
+    DateTimeOffset ExecutedAt = default);

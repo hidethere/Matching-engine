@@ -17,11 +17,14 @@ namespace MatchingEngine.Kafka
     {
         private readonly string _boostrap;
         private readonly string _topic;
+        private readonly string _groupId;
 
-        public KafkaTradeConsumer(string boostrap, string topic)
+
+        public KafkaTradeConsumer(string boostrap, string topic, string groupId)
         {
             _boostrap = boostrap;
             _topic = topic;
+            _groupId = groupId;
         }
 
         public async IAsyncEnumerable<Trade> ReadAllAsync([EnumeratorCancellation] CancellationToken ct = default)
@@ -30,7 +33,7 @@ namespace MatchingEngine.Kafka
                 new ConsumerConfig
                 {
                     BootstrapServers = _boostrap,
-                    GroupId = "market-data",
+                    GroupId = _groupId,
                     AutoOffsetReset = AutoOffsetReset.Earliest
                 }
             ).Build();

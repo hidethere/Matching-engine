@@ -6,7 +6,7 @@ namespace MatchingEngine.Core
 {
     public class EngineHost
     {
-        private long _seq;
+        private long _tradeSeq;
         private readonly Dictionary<string, MatchingEngine> _engines;
         private readonly Channel<Trade> _outbound = Channel.CreateUnbounded<Trade>();
         private readonly IOrderLog _orderLog;
@@ -42,11 +42,11 @@ namespace MatchingEngine.Core
                     }
                     else
                     {
-                        var stamped = order with { Id = ++_seq };
+                        var stamped = order with { Id = ++_tradeSeq };
                         scratch.Clear(); // Clear the scratch list before writing trades to the outbound channel
                         engine.Submit(stamped, scratch);
                         foreach (var trade in scratch)
-                            _outbound.Writer.TryWrite(trade);
+                            _outbound.Writer.TryWrite(trade with { Id = ++_tradeSeq, ExecutedAt = DateTimeOffset.UtcNow });
                     }
                     processed++;
                 
